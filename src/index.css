@@ -15,3 +15,21 @@
 .animate-slide-in {
   animation: slide-in 0.3s ease-out;
 }
+
+/* Remove border/outline from Google Maps InfoWindow close (X) button */
+.gm-style .gm-style-iw-c button.gm-ui-hover-effect,
+.gm-style-iw button.gm-ui-hover-effect,
+.gm-ui-hover-effect {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.gm-style .gm-style-iw-c button.gm-ui-hover-effect:focus,
+.gm-style-iw button.gm-ui-hover-effect:focus,
+.gm-ui-hover-effect:focus {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}

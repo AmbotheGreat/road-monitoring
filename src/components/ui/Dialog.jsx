@@ -9,7 +9,8 @@ const Dialog = ({
   showCloseButton = true,
   autoClose = false,
   autoCloseDelay = 3000,
-  className = ''
+  className = '',
+  showFooter = true
 }) => {
   // Auto close functionality
   useEffect(() => {
@@ -160,17 +161,19 @@ const Dialog = ({
           </div>
 
           {/* Footer with action buttons */}
-          <div className="bg-gray-50 px-6 py-4">
-            <div className="flex justify-end">
-              <button
-                type="button"
-                className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                onClick={onClose}
-              >
-                OK
-              </button>
+          {showFooter && (
+            <div className="bg-gray-50 px-6 py-4">
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  onClick={onClose}
+                >
+                  OK
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

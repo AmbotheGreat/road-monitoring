@@ -1,10 +1,10 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import React from 'react'
 
 const Navbar = () => {
-  const { user, signOut } = useAuth()
+  const { user, signOut, isAdmin } = useAuth()
   const { success, error: showError } = useToast()
   const navigate = useNavigate()
 
@@ -34,24 +34,54 @@ const Navbar = () => {
             </Link>
             {user && (
               <div className="hidden md:ml-6 md:flex md:space-x-8">
-                <Link
-                  to="/dashboard"
-                  className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 hover:text-blue-600 transition"
-                >
-                  Dashboard
-                </Link>
-                <Link
+                {/* Admin only link */}
+                {isAdmin && (
+                  <NavLink
+                    to="/dashboard"
+                    className={({ isActive }) =>
+                      `inline-flex items-center px-1 pt-1 text-sm font-medium transition ${
+                        isActive ? 'text-blue-600' : 'text-gray-900 hover:text-blue-600'
+                      }`
+                    }
+                  >
+                    Dashboard
+                  </NavLink>
+                )}
+                {/* Available to all users */}
+                <NavLink
                   to="/map"
-                  className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 hover:text-blue-600 transition"
+                  className={({ isActive }) =>
+                    `inline-flex items-center px-1 pt-1 text-sm font-medium transition ${
+                      isActive ? 'text-blue-600' : 'text-gray-900 hover:text-blue-600'
+                    }`
+                  }
                 >
                   Map
-                </Link>
-                <Link
+                </NavLink>
+                {/* Admin only link */}
+                {isAdmin && (
+                  <NavLink
+                    to="/roads"
+                    className={({ isActive }) =>
+                      `inline-flex items-center px-1 pt-1 text-sm font-medium transition ${
+                        isActive ? 'text-blue-600' : 'text-gray-900 hover:text-blue-600'
+                      }`
+                    }
+                  >
+                    Roads
+                  </NavLink>
+                )}
+                {/* Available to all users */}
+                <NavLink
                   to="/form"
-                  className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 hover:text-blue-600 transition"
+                  className={({ isActive }) =>
+                    `inline-flex items-center px-1 pt-1 text-sm font-medium transition ${
+                      isActive ? 'text-blue-600' : 'text-gray-900 hover:text-blue-600'
+                    }`
+                  }
                 >
                   Report Issue
-                </Link>
+                </NavLink>
               </div>
             )}
           </div>

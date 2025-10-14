@@ -4,7 +4,7 @@ import { SearchableDropdown, Button, Dialog } from '../components/ui';
 import { useRoadsData } from '../hooks';
 import { roadsService } from '../services';
 
-const defaultData = [
+const concreteData = [
   { type: 'Cracking - Multiple Narrow', weight: 3.6 },
   { type: 'Cracking - Transverse Wide', weight: 5.5 },
   { type: 'Cracking - Transverse Narrow', weight: 3.5 },
@@ -16,10 +16,30 @@ const defaultData = [
   { type: 'Joint Sealant Deterioration', weight: 0.13 },
 ];
 
+const asphaltData = [
+  { type: 'Cracking - Crocodile Narrow', weight: 3.5 },
+  { type: 'Cracking - Crocodile Wide', weight: 5.9 },
+  { type: 'Cracking - Transverse Wide', weight: 5.5 },
+  { type: 'Cracking - Transverse Narrow', weight: 3.3 },
+  { type: 'Edge Break (Large)', weight: 1.25 },
+  { type: 'Edge Break (Medium)', weight: 0.82 },
+  { type: 'Edge Break (Small)', weight: 0.41 },
+  { type: 'Patching', weight: 1.25 },
+  { type: 'Potholes (Number)', weight: 0.36 },
+  { type: 'Surface Failures', weight: 0.18 },
+  { type: 'Rutting (RDM)', weight: 4 },
+  { type: 'Wearing Surface - Minor', weight: 0.55 },
+  { type: 'Wearing Surface - Severe', weight: 1.2 },
+];
+
 const VCIForm = () => {
   const navigate = useNavigate();
+  
+  // Surface type state
+  const [surfaceType, setSurfaceType] = useState('concrete'); // 'concrete' or 'asphalt'
+  
   const [data, setData] = useState(
-    defaultData.map(item => ({
+    concreteData.map(item => ({
       ...item,
       observed: '',
       weighted: 0,
@@ -47,28 +67,6 @@ const VCIForm = () => {
     fetchRoads();
   }, [fetchRoads]);
 
-  // Debug: Log roads data to see the actual structure
-  useEffect(() => {
-    if (roadsData && roadsData.length > 0) {
-      console.log('Roads data structure:', roadsData[0]);
-      console.log('Available fields:', Object.keys(roadsData[0]));
-      console.log('Total roads loaded:', roadsData.length);
-      
-      // Check for roads with VCI values
-      const roadsWithVCI = roadsData.filter(road => road.vci !== null && road.vci !== undefined);
-      const roadsWithoutVCI = roadsData.filter(road => road.vci === null || road.vci === undefined);
-      
-      console.log('Roads with VCI values:', roadsWithVCI.length);
-      console.log('Roads without VCI values:', roadsWithoutVCI.length);
-      
-      // Check for roads with missing road_name
-      const roadsWithoutName = roadsData.filter(road => !road.road_name);
-      if (roadsWithoutName.length > 0) {
-        console.log('Roads without road_name:', roadsWithoutName.length);
-        console.log('Sample road without name:', roadsWithoutName[0]);
-      }
-    }
-  }, [roadsData]);
 
   const handleInputChange = (index, value) => {
     const newData = [...data];
@@ -109,7 +107,7 @@ const VCIForm = () => {
     setIsSaving(true);
 
     try {
-      await roadsService.updateRoad(selectedRoadId, { vci: VCI });
+      await roadsService.updateRoad(selectedRoadId, { vci: VCI, surface_type: surfaceType });
       
       setDialog({
         isOpen: true,
@@ -121,7 +119,6 @@ const VCIForm = () => {
       // Refresh roads data to get updated values
       fetchRoads();
     } catch (error) {
-      console.error('Error saving VCI:', error);
       setDialog({
         isOpen: true,
         type: 'error',
@@ -137,6 +134,17 @@ const VCIForm = () => {
     setDialog({ isOpen: false, type: 'info', title: '', message: '' });
   };
 
+  const handleSurfaceTypeChange = (type) => {
+    setSurfaceType(type);
+    const templateData = type === 'concrete' ? concreteData : asphaltData;
+    setData(
+      templateData.map(item => ({
+        ...item,
+        observed: '',
+        weighted: 0,
+      }))
+    );
+  };
 
   const totalSDWF = data.reduce((sum, item) => sum + item.weighted, 0);
   const VCI = totalSDWF / 4.3;
@@ -146,8 +154,38 @@ const VCIForm = () => {
       <div className="bg-white shadow-lg rounded-lg p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">VCI Distress Evaluation Form</h2>
         
-        {/* Road Selection */}
-        <div className="mb-6">
+       <div className="flex w-full">
+       <div className="mb-6 w-1/2">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Surface Type
+          </label>
+          <div className="inline-flex rounded-md shadow-sm" role="group">
+            <button
+              type="button"
+              onClick={() => handleSurfaceTypeChange('concrete')}
+              className={`px-6 py-2 text-sm font-medium border rounded-l-lg transition-colors ${
+                surfaceType === 'concrete'
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              Concrete
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSurfaceTypeChange('asphalt')}
+              className={`px-6 py-2 text-sm font-medium border rounded-r-lg transition-colors ${
+                surfaceType === 'asphalt'
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              Asphalt
+            </button>
+          </div>
+        </div>
+        
+        <div className="mb-6 w-1/2">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Select Road for Evaluation
           </label>
@@ -173,6 +211,7 @@ const VCIForm = () => {
             </div>
           )}
         </div>
+       </div>
 
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm text-left text-gray-700">

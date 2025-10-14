@@ -11,9 +11,11 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import Dashboard from './pages/Dashboard'
 import NotFound from './pages/NotFound'
+import Roads from './pages/Roads'
 
 // Components
 import ProtectedLayout from './components/ProtectedLayout'
+import RoleBasedRoute from './components/RoleBasedRoute'
 import { useAuth } from './context/AuthContext'
 
 function App() {
@@ -40,11 +42,14 @@ function App() {
       />
 
       {/* Protected routes - require authentication - Navbar shows on all these routes */}
+      {/* Admin only route */}
       <Route
         path="/dashboard"
         element={
           <ProtectedLayout>
-            <Dashboard />
+            <RoleBasedRoute allowedRoles={['admin']}>
+              <Dashboard />
+            </RoleBasedRoute>
           </ProtectedLayout>
         }
       />
@@ -61,6 +66,17 @@ function App() {
         element={
           <ProtectedLayout>
             <VCIForm />
+          </ProtectedLayout>
+        }
+      />
+      {/* Admin only route */}
+      <Route
+        path="/roads"
+        element={
+          <ProtectedLayout>
+            <RoleBasedRoute allowedRoles={['admin']}>
+              <Roads />
+            </RoleBasedRoute>
           </ProtectedLayout>
         }
       />

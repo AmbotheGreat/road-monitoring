@@ -17,12 +17,14 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [userRole, setUserRole] = useState(null)
 
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
       setUser(session?.user ?? null)
+      setUserRole(session?.user?.user_metadata?.role || 'user')
       setLoading(false)
     })
 
@@ -32,6 +34,7 @@ export const AuthProvider = ({ children }) => {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
       setUser(session?.user ?? null)
+      setUserRole(session?.user?.user_metadata?.role || 'user')
       setLoading(false)
     })
 
@@ -42,10 +45,19 @@ export const AuthProvider = ({ children }) => {
     user,
     session,
     loading,
-    signUp: async (email, password) => {
+    userRole,
+    isAdmin: userRole === 'admin',
+    isUser: userRole === 'user',
+    signUp: async (email, password, metadata = {}) => {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            role: metadata.role || 'user',
+            ...metadata
+          }
+        }
       })
       return { data, error }
     },

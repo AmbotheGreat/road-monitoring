@@ -34,7 +34,8 @@ const RegisterForm = () => {
     setLoading(true)
 
     try {
-      const { data, error } = await signUp(email, password)
+      // Default role is 'user', can be changed to 'admin' manually in Supabase
+      const { data, error } = await signUp(email, password, { role: 'user' })
       
       if (error) {
         showError(error.message)

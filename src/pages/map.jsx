@@ -103,15 +103,7 @@ const Map = () => {
         // Zoom to the selected road
         mapInstanceRef.current.fitBounds(bounds);
         
-        // Add some padding after fitBounds
-        setTimeout(() => {
-            if (mapInstanceRef.current) {
-                const currentZoom = mapInstanceRef.current.getZoom();
-                if (currentZoom > 15) {
-                    mapInstanceRef.current.setZoom(15);
-                }
-            }
-        }, 300);
+        // Keep the zoom level determined by fitBounds without forcing a zoom-out
 
         // Open the info window for this road
         if (roadInfoWindowsRef.current[roadId]) {
@@ -152,32 +144,30 @@ const Map = () => {
 
             validRoadsCount++;
 
+            // Determine status from VCI and pick colors
+            const vciValue = road.vci !== null && road.vci !== undefined ? parseFloat(road.vci) : NaN;
+            let status = null;
+            if (!isNaN(vciValue)) {
+                if (vciValue > 70 && vciValue <= 100) status = 'good';
+                else if (vciValue > 40 && vciValue <= 70) status = 'fair';
+                else if (vciValue > 20 && vciValue <= 40) status = 'poor';
+                else if (vciValue >= 1 && vciValue <= 20) status = 'bad';
+            }
+
+            const statusToColor = {
+                good: '#10b981',  // green-500
+                fair: '#f59e0b',  // amber-500
+                poor: '#f97316',  // orange-500
+                bad: '#ef4444',   // red-500
+            };
+
+            const segmentColor = status ? statusToColor[status] : '#3b82f6'; // default blue
+
             // Calculate midpoint between start and end
             const midpoint = {
                 lat: (startCoord.lat + endCoord.lat) / 2,
                 lng: (startCoord.lng + endCoord.lng) / 2
             };
-
-            // Create marker at midpoint (road marker)
-            const roadMarker = new window.google.maps.Marker({
-                position: midpoint,
-                map: map,
-                title: `${road.road_name || 'Road'}`,
-                icon: {
-                    path: window.google.maps.SymbolPath.CIRCLE,
-                    scale: 10,
-                    fillColor: '#ef4444', // Red
-                    fillOpacity: 1,
-                    strokeColor: '#ffffff',
-                    strokeWeight: 2,
-                },
-                label: {
-                    text: 'R',
-                    color: '#ffffff',
-                    fontSize: '12px',
-                    fontWeight: 'bold',
-                }
-            });
 
             // Create info window content
             const infoContent = `
@@ -188,15 +178,17 @@ const Map = () => {
                     ${road.location ? `<p style="margin: 4px 0; color: #6b7280; font-size: 14px;">
                         <strong>Location:</strong> ${road.location}
                     </p>` : ''}
+                    ${status ? `<p style="margin: 4px 0; color: #6b7280; font-size: 14px; display:flex; align-items:center; gap:6px;">
+                        <strong>Status:</strong>
+                        <span style="display:inline-block;width:10px;height:10px;border-radius:9999px;background:${segmentColor};"></span>
+                        <span style="text-transform:capitalize;">${status}</span>
+                    </p>` : ''}
                     ${road.vci !== null && road.vci !== undefined ? `<p style="margin: 4px 0; color: #6b7280; font-size: 14px;">
                         <strong>VCI:</strong> ${parseFloat(road.vci).toFixed(2)}
                     </p>` : ''}
-                    <p style="margin: 4px 0; color: #6b7280; font-size: 12px;">
-                        <strong>Start:</strong> ${startCoord.lat.toFixed(6)}, ${startCoord.lng.toFixed(6)}
-                    </p>
-                    <p style="margin: 4px 0; color: #6b7280; font-size: 12px;">
-                        <strong>End:</strong> ${endCoord.lat.toFixed(6)}, ${endCoord.lng.toFixed(6)}
-                    </p>
+                    ${road.surface_type ? `<p style="margin: 4px 0; color: #6b7280; font-size: 14px;">
+                        <strong>Surface:</strong> ${String(road.surface_type).charAt(0).toUpperCase()}${String(road.surface_type).slice(1)}
+                    </p>` : ''}
                 </div>
             `;
 
@@ -207,56 +199,33 @@ const Map = () => {
             // Store info window by road id for later access
             roadInfoWindowsRef.current[road.id] = infoWindow;
 
-            // Add click listener to road marker
-            roadMarker.addListener('click', () => {
-                // Close previous info window if open
-                if (currentInfoWindowRef.current) {
-                    currentInfoWindowRef.current.close();
-                }
-                
-                infoWindow.setPosition(midpoint);
-                infoWindow.open(map);
-                
-                // Store reference to current info window
-                currentInfoWindowRef.current = infoWindow;
-            });
+            // Marker removed; interaction is via polyline clicks
 
-            // Store marker
-            markersRef.current.push(roadMarker);
-
-            // Create polyline connecting start and end (all blue)
+            // Draw straight polyline between start and end (no Directions API)
             const polyline = new window.google.maps.Polyline({
                 path: [startCoord, endCoord],
-                geodesic: true,
-                strokeColor: '#3b82f6', // Blue
+                geodesic: false,
+                strokeColor: segmentColor,
                 strokeOpacity: 0.8,
                 strokeWeight: 5,
                 map: map,
             });
 
-            // Add click listener to polyline
             polyline.addListener('click', (event) => {
-                // Close previous info window if open
                 if (currentInfoWindowRef.current) {
                     currentInfoWindowRef.current.close();
                 }
-                
                 infoWindow.setPosition(event.latLng);
                 infoWindow.open(map);
-                
-                // Store reference to current info window
                 currentInfoWindowRef.current = infoWindow;
             });
 
-            // Store polyline
             polylinesRef.current.push(polyline);
-
-            // Extend bounds to include both points
             bounds.extend(startCoord);
             bounds.extend(endCoord);
         });
 
-        // Fit map to show all roads (unless we're zooming to a specific road)
+        // Fit bounds after drawing all polylines (unless zooming to a specific road)
         if (validRoadsCount > 0) {
             if (!isZoomingToRoadRef.current) {
                 map.fitBounds(bounds);
@@ -295,107 +264,93 @@ const Map = () => {
         <>
             {/* Live Map View */}
             <div className="bg-white rounded-lg shadow-lg p-6 m-2">
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-semibold text-gray-800">Live Map View</h2>
-                    
-                    {/* Status indicators */}
-                    <div className="flex items-center gap-4">
-                        {roadsLoading && (
-                            <span className="text-sm text-blue-600 flex items-center gap-2">
-                                <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                Loading roads...
-                            </span>
-                        )}
-                        {!roadsLoading && roadsData && (
-                            <span className="text-sm text-green-600 font-medium">
-                                {roadsData.length} road{roadsData.length !== 1 ? 's' : ''} loaded
-                            </span>
-                        )}
-                        {roadsError && (
-                            <span className="text-sm text-red-600">
-                                Error: {roadsError}
-                            </span>
-                        )}
-                    </div>
-                </div>
+                <div className="relative">
+                    <GoogleMap
+                        apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
+                        center={MAP_CONFIG.DEFAULT_CENTER}
+                        zoom={MAP_CONFIG.DEFAULT_ZOOM}
+                        height={MAP_CONFIG.DEFAULT_HEIGHT}
+                        onMapLoad={handleMapLoad}
+                    />
 
-                {/* Road Search */}
-                <div className="mb-4">
-                    <div className="flex items-end gap-2">
-                        <div className="flex-1">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                🔍 Search Road
-                            </label>
-                            <SearchableDropdown
-                                options={roadsData || []}
-                                value={selectedRoadId}
-                                onChange={handleRoadSelection}
-                                placeholder="Search and select a road to view on map..."
-                                displayKey="road_name"
-                                valueKey="id"
-                                loading={roadsLoading}
-                                error={roadsError}
-                                className="max-w-md"
-                            />
-                        </div>
-                        {selectedRoadId && (
-                            <button
-                                onClick={() => {
-                                    setSelectedRoadId('');
-                                    setSelectedRoad(null);
-                                    isZoomingToRoadRef.current = false;
-                                    if (mapInstanceRef.current && roadsData && roadsData.length > 0) {
-                                        displayRoadsOnMap(mapInstanceRef.current);
-                                    }
-                                }}
-                                className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium rounded-md transition-colors"
-                            >
-                                View All Roads
-                            </button>
-                        )}
-                    </div>
-                    {selectedRoad && (
-                        <div className="mt-2 p-3 bg-blue-50 rounded-md border border-blue-200 flex justify-between items-center">
-                            <p className="text-sm text-blue-800">
-                                <span className="font-medium">Selected Road:</span> {selectedRoad.road_name}
-                                {selectedRoad.location && (
-                                    <span className="ml-2 text-blue-600">({selectedRoad.location})</span>
+                    {/* Search Overlay */}
+                    <div className="absolute top-3 left-3 z-10 max-w-md">
+                        <div className="bg-white/95 backdrop-blur rounded-lg shadow border border-gray-200 p-3">
+                            <div className="flex items-end gap-2">
+                                <div className="flex-1">
+                                    <SearchableDropdown
+                                        options={roadsData || []}
+                                        value={selectedRoadId}
+                                        onChange={handleRoadSelection}
+                                        placeholder="Select a map ... 🔍"
+                                        displayKey="road_name"
+                                        valueKey="id"
+                                        loading={roadsLoading}
+                                        error={roadsError}
+                                        className="max-w-md"
+                                    />
+                                </div>
+                                {selectedRoadId && (
+                                    <button
+                                        onClick={() => {
+                                            setSelectedRoadId('');
+                                            setSelectedRoad(null);
+                                            isZoomingToRoadRef.current = false;
+                                            if (mapInstanceRef.current && roadsData && roadsData.length > 0) {
+                                                displayRoadsOnMap(mapInstanceRef.current);
+                                            }
+                                        }}
+                                        className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium rounded-md transition-colors"
+                                    >
+                                        View All Roads
+                                    </button>
                                 )}
+                            </div>
+                            {selectedRoad && (
+                                <div className="mt-2 p-3 bg-blue-50 rounded-md border border-blue-200">
+                                    <p className="text-sm text-blue-800">
+                                        <span className="font-medium">Selected Road:</span> {selectedRoad.road_name}
+                                        {selectedRoad.location && (
+                                            <span className="ml-2 text-blue-600">({selectedRoad.location})</span>
+                                        )}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Legend Overlay */}
+                    <div className="absolute bottom-3 left-3 z-10">
+                        <div className="bg-white/95 backdrop-blur rounded-lg shadow border border-gray-200 p-3">
+                            <h3 className="text-sm font-semibold text-gray-700 mb-2">Legend</h3>
+                            <div className="flex flex-wrap gap-4 text-xs">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-8 h-1 bg-blue-500"></div>
+                                    <span className="text-gray-600">No VCI Data</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-4 h-4 rounded-full bg-green-500 border-2 border-white"></div>
+                                    <span className="text-gray-600">Good</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-4 h-4 rounded-full bg-yellow-400 border-2 border-white"></div>
+                                    <span className="text-gray-600">Fair</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-4 h-4 rounded-full bg-orange-500 border-2 border-white"></div>
+                                    <span className="text-gray-600">Poor</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-4 h-4 rounded-full bg-red-600 border-2 border-white"></div>
+                                    <span className="text-gray-600">Bad</span>
+                                </div>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-2">
+                                Click on road segments to view details
                             </p>
                         </div>
-                    )}
-                </div>
-
-                {/* Map Legend */}
-                <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <h3 className="text-sm font-semibold text-gray-700 mb-2">Legend</h3>
-                    <div className="flex flex-wrap gap-4 text-xs">
-                        <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 rounded-full bg-red-500 border-2 border-white flex items-center justify-center">
-                                <span className="text-white text-[8px] font-bold">R</span>
-                            </div>
-                            <span className="text-gray-600">Road Marker</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-8 h-1 bg-blue-500"></div>
-                            <span className="text-gray-600">Road Segment</span>
-                        </div>
                     </div>
-                    <p className="text-xs text-gray-500 mt-2">
-                        Click on markers or road segments to view details
-                    </p>
                 </div>
-
-                <GoogleMap
-                    apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
-                    center={MAP_CONFIG.DEFAULT_CENTER}
-                    zoom={MAP_CONFIG.DEFAULT_ZOOM}
-                    height={MAP_CONFIG.DEFAULT_HEIGHT}
-                    onMapLoad={handleMapLoad}
-                />
             </div>
         </>
     );
