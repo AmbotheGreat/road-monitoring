@@ -3,13 +3,14 @@ import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { ErrorMessage } from '../ui/ErrorMessage';
 import { Button } from '../ui/Button';
 
-const RoadsTable = ({ 
-    data, 
-    loading, 
-    error, 
+const RoadsTable = ({
+    data,
+    loading,
+    error,
     onRefresh,
     onEdit,
-    onDelete
+    onDelete,
+    onView,
 }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [conditionFilter, setConditionFilter] = useState('all'); // good | fair | poor | bad | all
@@ -45,7 +46,7 @@ const RoadsTable = ({
     const getVciColorClasses = (value) => {
         const numValue = typeof value === 'number' ? value : Number(value);
         if (isNaN(numValue)) return '';
-        
+
         if (numValue >= 70.1) return 'bg-green-500 text-white font-semibold';
         if (numValue >= 40.1) return 'bg-yellow-400 text-gray-900 font-semibold';
         if (numValue >= 20.1) return 'bg-orange-500 text-white font-semibold';
@@ -100,7 +101,7 @@ const RoadsTable = ({
             <div className="flex flex-col gap-3 mb-4">
                 <div className="flex justify-between items-center gap-3">
                     <h2 className="text-2xl font-semibold text-gray-800">Roads Data</h2>
-                    <Button 
+                    <Button
                         onClick={onRefresh}
                         disabled={loading}
                         variant="primary"
@@ -153,7 +154,7 @@ const RoadsTable = ({
                     Showing {Math.min(pageEnd, totalItems)} of {totalItems} result{totalItems !== 1 ? 's' : ''} · Page {currentPageSafe} of {totalPages}
                 </div>
             </div>
-            
+
             <div className="overflow-x-auto">
                 {!error && !loading && rows.length === 0 ? (
                     <div className="text-center py-8">
@@ -177,7 +178,7 @@ const RoadsTable = ({
                                         {key.replace(/_/g, ' ')}
                                     </th>
                                 ))}
-                                {(onEdit || onDelete) && (
+                                {(onEdit || onDelete || onView) && (
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Actions
                                     </th>
@@ -190,15 +191,15 @@ const RoadsTable = ({
                                     {Object.entries(road).map(([key, value]) => {
                                         const isVciColumn = key.toLowerCase() === 'vci' || key.toLowerCase() === 'vsi';
                                         const colorClasses = isVciColumn ? getVciColorClasses(value) : '';
-                                        
+
                                         return (
-                                            <td 
-                                                key={key} 
+                                            <td
+                                                key={key}
                                                 className={`px-6 py-2 whitespace-nowrap text-sm ${colorClasses || 'text-gray-900'}`}
                                             >
                                                 {value !== null && value !== undefined ? (
-                                                    typeof value === 'object' ? 
-                                                        JSON.stringify(value) : 
+                                                    typeof value === 'object' ?
+                                                        JSON.stringify(value) :
                                                         String(value)
                                                 ) : (
                                                     <span className="text-gray-400">-</span>
@@ -206,9 +207,18 @@ const RoadsTable = ({
                                             </td>
                                         );
                                     })}
-                                    {(onEdit || onDelete) && (
+                                    {(onEdit || onDelete || onView) && (
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             <div className="flex items-center gap-2">
+                                                {onView && (
+                                                    <Button
+                                                        variant="secondary"
+                                                        size="sm"
+                                                        onClick={() => onView(road)}
+                                                    >
+                                                        View
+                                                    </Button>
+                                                )}
                                                 {onEdit && (
                                                     <Button
                                                         variant="outline"
@@ -236,7 +246,7 @@ const RoadsTable = ({
                     </table>
                 )}
             </div>
-            
+
             {filteredData.length > 0 && (
                 <div className="mt-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
                     <div className="text-sm text-gray-600">

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PageLayout } from '../components/layout';
 import { RoadsTable } from '../components/tables';
 import { useRoadsData } from '../hooks';
@@ -7,6 +8,7 @@ import { useToast } from '../context/ToastContext';
 import { Dialog, Button } from '../components/ui';
 
 const Roads = () => {
+  const navigate = useNavigate();
   const { data, loading, error, fetchRoads } = useRoadsData();
   const { success, error: showError, info } = useToast();
   const [confirmDelete, setConfirmDelete] = useState({ open: false, road: null });
@@ -30,17 +32,25 @@ const Roads = () => {
     setEditDialog({ open: true, road });
   };
 
+  const handleView = (road) => {
+    if (!road || !road.id) {
+      info('Select a valid road to view');
+      return;
+    }
+    navigate(`/roads/${encodeURIComponent(road.id)}/view`);
+  };
+
   const handleSaveEdit = async () => {
     try {
       const road = editDialog.road;
       if (!road || !road.id) return;
-      
+
       await roadsService.updateRoad(road.id, {
         road_name: editForm.road_name,
         start: editForm.start,
         end: editForm.end
       });
-      
+
       success('Road updated successfully');
       setEditDialog({ open: false, road: null });
       fetchRoads();
@@ -80,6 +90,7 @@ const Roads = () => {
         loading={loading}
         error={error}
         onRefresh={fetchRoads}
+        onView={handleView}
         onEdit={handleEdit}
         onDelete={handleDelete}
       />

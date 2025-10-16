@@ -11,6 +11,7 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import Dashboard from './pages/Dashboard'
 import NotFound from './pages/NotFound'
+import RoadView from './pages/RoadView'
 import Roads from './pages/Roads'
 
 // Components
@@ -76,6 +77,16 @@ function App() {
           <ProtectedLayout>
             <RoleBasedRoute allowedRoles={['admin']}>
               <Roads />
+            </RoleBasedRoute>
+          </ProtectedLayout>
+        }
+      />
+      <Route
+        path="/roads/:id/view"
+        element={
+          <ProtectedLayout>
+            <RoleBasedRoute allowedRoles={['admin']}>
+              <RoadView />
             </RoleBasedRoute>
           </ProtectedLayout>
         }
