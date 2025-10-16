@@ -94,7 +94,10 @@ const RoadsTable = ({
     const pageEnd = pageStart + pageSize;
     const pageData = filteredData.slice(pageStart, pageEnd);
 
-    const columnKeys = Object.keys((pageData[0] || filteredData[0] || rows[0]) || {});
+    const hiddenColumns = new Set(['grid_annotations', 'grid_notations', 'gridnotations']);
+    const columnKeys = Object
+        .keys((pageData[0] || filteredData[0] || rows[0]) || {})
+        .filter((key) => !hiddenColumns.has(String(key)));
 
     return (
         <div className="bg-white rounded-lg shadow-lg p-6">
@@ -188,7 +191,8 @@ const RoadsTable = ({
                         <tbody className="bg-white divide-y divide-gray-200">
                             {pageData.map((road, index) => (
                                 <tr key={road.id || index} className="hover:bg-gray-50">
-                                    {Object.entries(road).map(([key, value]) => {
+                                    {columnKeys.map((key) => {
+                                        const value = road[key];
                                         const isVciColumn = key.toLowerCase() === 'vci' || key.toLowerCase() === 'vsi';
                                         const colorClasses = isVciColumn ? getVciColorClasses(value) : '';
 
