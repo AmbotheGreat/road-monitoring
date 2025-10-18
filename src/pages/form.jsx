@@ -34,10 +34,10 @@ const asphaltData = [
 
 const VCIForm = () => {
   const navigate = useNavigate();
-  
+
   // Surface type state
   const [surfaceType, setSurfaceType] = useState('concrete'); // 'concrete' or 'asphalt'
-  
+
   const [data, setData] = useState(
     concreteData.map(item => ({
       ...item,
@@ -45,15 +45,15 @@ const VCIForm = () => {
       weighted: 0,
     }))
   );
-  
+
   // Roads data and selection state
   const { data: roadsData, loading: roadsLoading, error: roadsError, fetchRoads } = useRoadsData();
   const [selectedRoadId, setSelectedRoadId] = useState('');
   const [selectedRoad, setSelectedRoad] = useState(null);
-  
+
   // Save state
   const [isSaving, setIsSaving] = useState(false);
-  
+
   // Dialog state
   const [dialog, setDialog] = useState({
     isOpen: false,
@@ -108,14 +108,14 @@ const VCIForm = () => {
 
     try {
       await roadsService.updateRoad(selectedRoadId, { vci: VCI, surface_type: surfaceType });
-      
+
       setDialog({
         isOpen: true,
         type: 'success',
         title: 'VCI Saved Successfully!',
         message: `VCI value ${VCI.toFixed(8)} has been saved successfully for ${selectedRoad?.road_name || 'the selected road'}.`
       });
-      
+
       // Refresh roads data to get updated values
       fetchRoads();
     } catch (error) {
@@ -147,71 +147,69 @@ const VCIForm = () => {
   };
 
   const totalSDWF = data.reduce((sum, item) => sum + item.weighted, 0);
-  const VCI = totalSDWF / 4.3;
+  const VCI = Math.max(0, 100 * (1 - Math.sqrt(1 - Math.pow((100 - (Math.min(300, totalSDWF) / 3)) / 100, 2))));
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="bg-white shadow-lg rounded-lg p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">VCI Distress Evaluation Form</h2>
-        
-       <div className="flex w-full">
-       <div className="mb-6 w-1/2">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Surface Type
-          </label>
-          <div className="inline-flex rounded-md shadow-sm" role="group">
-            <button
-              type="button"
-              onClick={() => handleSurfaceTypeChange('concrete')}
-              className={`px-6 py-2 text-sm font-medium border rounded-l-lg transition-colors ${
-                surfaceType === 'concrete'
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              Concrete
-            </button>
-            <button
-              type="button"
-              onClick={() => handleSurfaceTypeChange('asphalt')}
-              className={`px-6 py-2 text-sm font-medium border rounded-r-lg transition-colors ${
-                surfaceType === 'asphalt'
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              Asphalt
-            </button>
+
+        <div className="flex w-full">
+          <div className="mb-6 w-1/2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Surface Type
+            </label>
+            <div className="inline-flex rounded-md shadow-sm" role="group">
+              <button
+                type="button"
+                onClick={() => handleSurfaceTypeChange('concrete')}
+                className={`px-6 py-2 text-sm font-medium border rounded-l-lg transition-colors ${surfaceType === 'concrete'
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                  }`}
+              >
+                Concrete
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSurfaceTypeChange('asphalt')}
+                className={`px-6 py-2 text-sm font-medium border rounded-r-lg transition-colors ${surfaceType === 'asphalt'
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                  }`}
+              >
+                Asphalt
+              </button>
+            </div>
+          </div>
+
+          <div className="mb-6 w-1/2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Select Road for Evaluation
+            </label>
+            <SearchableDropdown
+              options={roadsData || []}
+              value={selectedRoadId}
+              onChange={handleRoadSelection}
+              placeholder="Search and select a road..."
+              displayKey="road_name"
+              valueKey="id"
+              loading={roadsLoading}
+              error={roadsError}
+              className="max-w-md"
+            />
+            {selectedRoad && (
+              <div className="mt-2 p-3 bg-blue-50 rounded-md">
+                <p className="text-sm text-blue-800">
+                  <span className="font-medium">Selected Road:</span> {selectedRoad.road_name}
+                  {selectedRoad.location && (
+                    <span className="ml-2 text-blue-600">({selectedRoad.location})</span>
+                  )}
+                </p>
+              </div>
+            )}
           </div>
         </div>
-        
-        <div className="mb-6 w-1/2">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Select Road for Evaluation
-          </label>
-          <SearchableDropdown
-            options={roadsData || []}
-            value={selectedRoadId}
-            onChange={handleRoadSelection}
-            placeholder="Search and select a road..."
-            displayKey="road_name"
-            valueKey="id"
-            loading={roadsLoading}
-            error={roadsError}
-            className="max-w-md"
-          />
-          {selectedRoad && (
-            <div className="mt-2 p-3 bg-blue-50 rounded-md">
-              <p className="text-sm text-blue-800">
-                <span className="font-medium">Selected Road:</span> {selectedRoad.road_name}
-                {selectedRoad.location && (
-                  <span className="ml-2 text-blue-600">({selectedRoad.location})</span>
-                )}
-              </p>
-            </div>
-          )}
-        </div>
-       </div>
 
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm text-left text-gray-700">
@@ -253,7 +251,7 @@ const VCIForm = () => {
             <span>VCI:</span>
             <span>{VCI.toFixed(8)}</span>
           </div>
-          
+
           {/* Submit Button */}
           <div className="mt-6 flex flex-col items-center space-y-4">
             <Button
@@ -264,7 +262,7 @@ const VCIForm = () => {
             >
               {isSaving ? 'Submitting VCI...' : 'Submit'}
             </Button>
-            
+
             {/* Helper Text */}
             {!selectedRoadId && (
               <p className="text-gray-500 text-sm">Please select a road to save VCI data</p>
@@ -275,7 +273,7 @@ const VCIForm = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Dialog for success/error messages */}
       <Dialog
         isOpen={dialog.isOpen}

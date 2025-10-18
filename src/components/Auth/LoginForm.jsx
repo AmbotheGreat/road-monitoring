@@ -14,7 +14,7 @@ const LoginForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
+
     if (!email || !password) {
       showError('Please fill in all fields')
       return
@@ -24,7 +24,7 @@ const LoginForm = () => {
 
     try {
       const { error } = await signIn(email, password)
-      
+
       if (error) {
         showError(error.message)
       } else {
@@ -42,9 +42,9 @@ const LoginForm = () => {
     <div className="w-full max-w-md">
       <div className="bg-white shadow-xl rounded-lg px-8 pt-6 pb-8">
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">
-          Sign In
+          Sign In s
         </h2>
-        
+
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label
