@@ -1,6 +1,7 @@
 import React from 'react'
 import './App.css'
 import { Routes, Route, Navigate } from 'react-router-dom'
+import MaintenancePage from './pages/maintenance'
 
 // Pages
 import Map from './pages/map'
@@ -118,6 +119,7 @@ function App() {
       {/* 404 page */}
       <Route path="*" element={<NotFound />} />
     </Routes>
+    // <MaintenancePage />
   )
 }
 
