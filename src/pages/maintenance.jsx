@@ -24,7 +24,7 @@ const MaintenancePage = () => {
             </div>
 
             <footer className="mt-8 text-gray-400 text-sm">
-                &copy; {new Date().getFullYear()} Your Company Name. All rights reserved.
+                &copy; {new Date().getFullYear()} AmboTheGreat. All rights reserved.
             </footer>
         </div>
     );
