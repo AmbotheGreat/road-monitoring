@@ -10,14 +10,14 @@ const Map = () => {
     const { connectionStatus, isLoading: connectionLoading } = useSupabaseConnection();
     const { data: roadsData, loading: roadsLoading, error: roadsError, fetchRoads } = useRoadsData();
     const navigate = useNavigate();
-    
+
     const markersRef = useRef([]);
     const polylinesRef = useRef([]);
     const mapInstanceRef = useRef(null);
     const currentInfoWindowRef = useRef(null);
     const roadInfoWindowsRef = useRef({}); // Store info windows by road id
     const isZoomingToRoadRef = useRef(false); // Flag to prevent auto-zoom out
-    
+
     const [selectedRoadId, setSelectedRoadId] = useState('');
     const [selectedRoad, setSelectedRoad] = useState(null);
 
@@ -31,13 +31,13 @@ const Map = () => {
         if (!coordString || typeof coordString !== 'string') {
             return null;
         }
-        
+
         const [lat, lng] = coordString.split(',').map(coord => parseFloat(coord.trim()));
-        
+
         if (isNaN(lat) || isNaN(lng)) {
             return null;
         }
-        
+
         return { lat, lng };
     };
 
@@ -70,7 +70,7 @@ const Map = () => {
     const handleRoadSelection = (roadId, roadData) => {
         setSelectedRoadId(roadId);
         setSelectedRoad(roadData);
-        
+
         if (!roadId || !roadData || !mapInstanceRef.current) {
             isZoomingToRoadRef.current = false;
             return;
@@ -82,7 +82,7 @@ const Map = () => {
         // Parse coordinates
         const startCoord = parseCoordinate(roadData.start);
         const endCoord = parseCoordinate(roadData.end);
-        
+
         if (!startCoord || !endCoord) {
             console.warn('Invalid coordinates for selected road');
             isZoomingToRoadRef.current = false;
@@ -99,10 +99,10 @@ const Map = () => {
         const bounds = new window.google.maps.LatLngBounds();
         bounds.extend(startCoord);
         bounds.extend(endCoord);
-        
+
         // Zoom to the selected road
         mapInstanceRef.current.fitBounds(bounds);
-        
+
         // Keep the zoom level determined by fitBounds without forcing a zoom-out
 
         // Open the info window for this road
@@ -111,7 +111,7 @@ const Map = () => {
             if (currentInfoWindowRef.current) {
                 currentInfoWindowRef.current.close();
             }
-            
+
             roadInfoWindowsRef.current[roadId].setPosition(midpoint);
             roadInfoWindowsRef.current[roadId].open(mapInstanceRef.current);
             currentInfoWindowRef.current = roadInfoWindowsRef.current[roadId];
@@ -239,7 +239,7 @@ const Map = () => {
     const handleMapLoad = (map) => {
         console.log('Google Map loaded successfully!', map);
         mapInstanceRef.current = map;
-        
+
         // Display roads if data is already loaded
         if (roadsData && roadsData.length > 0) {
             displayRoadsOnMap(map);
@@ -264,18 +264,11 @@ const Map = () => {
         <>
             {/* Live Map View */}
             <div className="bg-white rounded-lg shadow-lg p-6 m-2">
-                <div className="relative">
-                    <GoogleMap
-                        apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
-                        center={MAP_CONFIG.DEFAULT_CENTER}
-                        zoom={MAP_CONFIG.DEFAULT_ZOOM}
-                        height={MAP_CONFIG.DEFAULT_HEIGHT}
-                        onMapLoad={handleMapLoad}
-                    />
-
-                    {/* Search Overlay */}
-                    <div className="absolute top-3 left-3 z-10 max-w-md">
-                        <div className="bg-white/95 backdrop-blur rounded-lg shadow border border-gray-200 p-3">
+                {/* Search and Legend - Side by Side */}
+                <div className="flex gap-4 mb-4">
+                    {/* Search Section */}
+                    <div className="flex-1">
+                        <div className="bg-white rounded-lg border border-gray-200 p-3">
                             <div className="flex items-end gap-2">
                                 <div className="flex-1">
                                     <SearchableDropdown
@@ -306,22 +299,12 @@ const Map = () => {
                                     </button>
                                 )}
                             </div>
-                            {selectedRoad && (
-                                <div className="mt-2 p-3 bg-blue-50 rounded-md border border-blue-200">
-                                    <p className="text-sm text-blue-800">
-                                        <span className="font-medium">Selected Road:</span> {selectedRoad.road_name}
-                                        {selectedRoad.location && (
-                                            <span className="ml-2 text-blue-600">({selectedRoad.location})</span>
-                                        )}
-                                    </p>
-                                </div>
-                            )}
                         </div>
                     </div>
 
-                    {/* Legend Overlay */}
-                    <div className="absolute bottom-3 left-3 z-10">
-                        <div className="bg-white/95 backdrop-blur rounded-lg shadow border border-gray-200 p-3">
+                    {/* Legend Section */}
+                    <div className="flex-1">
+                        <div className="bg-white rounded-lg border border-gray-200 p-3">
                             <h3 className="text-sm font-semibold text-gray-700 mb-2">Legend</h3>
                             <div className="flex flex-wrap gap-4 text-xs">
                                 <div className="flex items-center gap-2">
@@ -350,6 +333,17 @@ const Map = () => {
                             </p>
                         </div>
                     </div>
+                </div>
+
+                {/* Map */}
+                <div className="relative">
+                    <GoogleMap
+                        apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
+                        center={MAP_CONFIG.DEFAULT_CENTER}
+                        zoom={MAP_CONFIG.DEFAULT_ZOOM}
+                        height={MAP_CONFIG.DEFAULT_HEIGHT}
+                        onMapLoad={handleMapLoad}
+                    />
                 </div>
             </div>
         </>

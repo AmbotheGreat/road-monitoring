@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SearchableDropdown, Button, Dialog } from '../components/ui';
 import { useRoadsData } from '../hooks';
-import { roadsService } from '../services';
+import { roadsService, reportsService } from '../services';
+import { useAuth } from '../context/AuthContext';
 
 const concreteData = [
   { type: 'Cracking - Multiple Narrow', weight: 3.6 },
@@ -34,6 +35,7 @@ const asphaltData = [
 
 const VCIForm = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   // Surface type state
   const [surfaceType, setSurfaceType] = useState('concrete'); // 'concrete' or 'asphalt'
@@ -107,7 +109,17 @@ const VCIForm = () => {
     setIsSaving(true);
 
     try {
+      // Update the road with VCI value
       await roadsService.updateRoad(selectedRoadId, { vci: VCI, surface_type: surfaceType });
+
+      // Create a VCI report entry
+      await reportsService.createReport({
+        user_id: user.id,
+        user_email: user.email,
+        road_id: selectedRoadId,
+        vci_value: VCI,
+        surface_type: surfaceType
+      });
 
       setDialog({
         isOpen: true,
@@ -164,8 +176,8 @@ const VCIForm = () => {
                 type="button"
                 onClick={() => handleSurfaceTypeChange('concrete')}
                 className={`px-6 py-2 text-sm font-medium border rounded-l-lg transition-colors ${surfaceType === 'concrete'
-                    ? 'bg-blue-600 text-white border-blue-600'
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                   }`}
               >
                 Concrete
@@ -174,8 +186,8 @@ const VCIForm = () => {
                 type="button"
                 onClick={() => handleSurfaceTypeChange('asphalt')}
                 className={`px-6 py-2 text-sm font-medium border rounded-r-lg transition-colors ${surfaceType === 'asphalt'
-                    ? 'bg-blue-600 text-white border-blue-600'
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                   }`}
               >
                 Asphalt

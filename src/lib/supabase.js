@@ -4,8 +4,14 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-// Create Supabase client
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Create Supabase client with proper auth options
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  }
+})
 
 // Helper functions for common database operations
 export const supabaseHelpers = {
@@ -28,7 +34,7 @@ export const supabaseHelpers = {
     },
 
     signOut: async () => {
-      const { error } = await supabase.auth.signOut()
+      const { error } = await supabase.auth.signOut({ scope: 'local' })
       return { error }
     },
 
@@ -97,7 +103,7 @@ export const supabaseHelpers = {
     subscribeToRoadData: (callback) => {
       return supabase
         .channel('road_monitoring_changes')
-        .on('postgres_changes', 
+        .on('postgres_changes',
           { event: '*', schema: 'public', table: 'road_monitoring' },
           callback
         )
@@ -145,13 +151,13 @@ export const supabaseHelpers = {
       const { data: roads, error } = await supabase
         .from('roads')
         .select('*');
-      
+
       if (error) {
         console.error('Error fetching roads:', error);
       } else {
         console.log('Roads data:', roads);
       }
-      
+
       return { data: roads, error };
     },
 

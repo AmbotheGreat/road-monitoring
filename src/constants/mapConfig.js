@@ -1,17 +1,17 @@
 // Default map configuration for the road monitoring system
 export const MAP_CONFIG = {
     // Default center coordinates (Philippines - adjust as needed)
-    DEFAULT_CENTER: { 
-        lat: 15.730244072653218, 
-        lng: 120.92988069462204 
+    DEFAULT_CENTER: {
+        lat: 15.730244072653218,
+        lng: 120.92988069462204
     },
-    
+
     // Default zoom level
     DEFAULT_ZOOM: 16,
-    
+
     // Map height
-    DEFAULT_HEIGHT: '500px',
-    
+    DEFAULT_HEIGHT: 'calc(100vh - 120px)',
+
     // Map styles
     STYLES: {
         // You can add custom map styles here

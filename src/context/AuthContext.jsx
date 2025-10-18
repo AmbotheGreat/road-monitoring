@@ -69,8 +69,43 @@ export const AuthProvider = ({ children }) => {
       return { data, error }
     },
     signOut: async () => {
-      const { error } = await supabase.auth.signOut()
-      return { error }
+      try {
+        // Check if we have a valid session first
+        const { data: { session: currentSession } } = await supabase.auth.getSession()
+
+        // Only call API signOut if we have a valid session
+        if (currentSession) {
+          const { error } = await supabase.auth.signOut({ scope: 'local' })
+          if (error && error.message !== 'Auth session missing!') {
+            throw error
+          }
+        }
+
+        // Always clear local state regardless of API call success
+        setSession(null)
+        setUser(null)
+        setUserRole(null)
+
+        // Clear any stored session data
+        localStorage.removeItem('supabase.auth.token')
+
+        return { error: null }
+      } catch (error) {
+        console.error('Sign out error:', error)
+
+        // Even if there's an error, clear local state
+        setSession(null)
+        setUser(null)
+        setUserRole(null)
+        localStorage.removeItem('supabase.auth.token')
+
+        // Don't return error if it's just a session missing error
+        if (error.message === 'Auth session missing!') {
+          return { error: null }
+        }
+
+        return { error }
+      }
     },
     resetPassword: async (email) => {
       const { data, error } = await supabase.auth.resetPasswordForEmail(email, {

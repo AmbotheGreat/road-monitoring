@@ -1,10 +1,11 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import Navbar from './Navbar'
 
 const ProtectedLayout = ({ children }) => {
   const { user, loading } = useAuth()
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
 
   if (loading) {
     return (
@@ -19,10 +20,15 @@ const ProtectedLayout = ({ children }) => {
   }
 
   return (
-    <>
-      <Navbar />
-      {children}
-    </>
+    <div className="flex min-h-screen bg-gray-50">
+      <Navbar isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
+      <div
+        className={`flex-1 transition-all duration-300 ${isSidebarOpen ? 'ml-64' : 'ml-20'
+          }`}
+      >
+        {children}
+      </div>
+    </div>
   )
 }
 
