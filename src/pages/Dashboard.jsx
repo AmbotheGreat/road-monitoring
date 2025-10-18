@@ -108,7 +108,7 @@ const Dashboard = () => {
           {/* Reports List Section */}
           <div className="bg-white shadow rounded-lg p-6 mt-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Users Who Submitted Issues
+              Users Who Submitted Conditions
             </h2>
 
             {loading ? (

@@ -11,6 +11,7 @@ const RoadsTable = ({
     onEdit,
     onDelete,
     onView,
+    onAdd,
 }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [conditionFilter, setConditionFilter] = useState('all'); // good | fair | poor | bad | all
@@ -104,13 +105,18 @@ const RoadsTable = ({
             <div className="flex flex-col gap-3 mb-4">
                 <div className="flex justify-between items-center gap-3">
                     <h2 className="text-2xl font-semibold text-gray-800">Roads Data</h2>
-                    <Button
-                        onClick={onRefresh}
-                        disabled={loading}
-                        variant="primary"
-                    >
-                        {loading ? 'Loading...' : 'Refresh Data'}
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        {onAdd && (
+                            <Button
+                                onClick={onAdd}
+                                disabled={loading}
+                                variant="primary"
+                            >
+                                Add Road
+                            </Button>
+                        )}
+
+                    </div>
                 </div>
 
                 {loading && (

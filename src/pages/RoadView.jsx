@@ -57,14 +57,31 @@ const RoadView = () => {
         setCellsState((prev) => {
             const next = { ...prev }
             if (!activeType) {
+                // Erase mode - clear all types from this cell
                 delete next[idx]
                 return next
             }
-            if (next[idx] === activeType) {
+
+            // Get current types for this cell (ensure it's an array)
+            const currentTypes = Array.isArray(next[idx]) ? [...next[idx]] : (next[idx] ? [next[idx]] : [])
+
+            // Toggle the active type
+            const typeIndex = currentTypes.indexOf(activeType)
+            if (typeIndex > -1) {
+                // Remove the type if it exists
+                currentTypes.splice(typeIndex, 1)
+            } else {
+                // Add the type if it doesn't exist
+                currentTypes.push(activeType)
+            }
+
+            // Update cell: remove if empty, otherwise store array
+            if (currentTypes.length === 0) {
                 delete next[idx]
             } else {
-                next[idx] = activeType
+                next[idx] = currentTypes
             }
+
             return next
         })
     }
@@ -101,7 +118,12 @@ const RoadView = () => {
             {/* Legend */}
             <div className="mb-6 border border-gray-200 rounded-lg p-4 bg-white">
                 <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-sm font-semibold text-gray-700">Legend</h2>
+                    <div>
+                        <h2 className="text-sm font-semibold text-gray-700">Legend</h2>
+                        <p className="text-xs text-gray-500 mt-1">
+                            {activeType ? `Active: ${legendTypes.find(t => t.key === activeType)?.label || activeType}` : 'Select a legend type to apply'}
+                        </p>
+                    </div>
                     <button
                         onClick={() => setLegendOpen(!legendOpen)}
                         className="px-3 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
@@ -109,6 +131,12 @@ const RoadView = () => {
                     >
                         {legendOpen ? 'Close' : 'Choose'} Legend
                     </button>
+                </div>
+
+                <div className="bg-blue-50 border border-blue-200 rounded-md p-2 mb-3">
+                    <p className="text-xs text-blue-800">
+                        <strong>💡 Tip:</strong> Click cells to add/remove the active legend type. Multiple types can stack in one cell!
+                    </p>
                 </div>
 
                 {legendOpen && (
@@ -146,23 +174,88 @@ const RoadView = () => {
                     style={{ gridTemplateColumns: `repeat(${cols}, minmax(40px, 1fr))` }}
                 >
                     {Array.from({ length: rows * cols }).map((_, idx) => {
-                        const type = cellsState[idx]
-                        const legendItem = legendTypes.find((t) => t.key === type)
-                        const swatchClass = legendItem?.swatchClass
-                        const image = legendItem?.image
+                        const cellData = cellsState[idx]
+                        // Ensure cellData is always an array
+                        const types = Array.isArray(cellData) ? cellData : (cellData ? [cellData] : [])
+                        const isEmpty = types.length === 0
+
+                        // Sort types so wearing_defects and multiple_cracks are always at the bottom (rendered first)
+                        const sortedTypes = [...types].sort((a, b) => {
+                            const bottomTypes = ['wearing_defects', 'multiple_cracks'];
+                            const aIsBottom = bottomTypes.includes(a);
+                            const bIsBottom = bottomTypes.includes(b);
+
+                            if (aIsBottom && !bIsBottom) return -1;
+                            if (!aIsBottom && bIsBottom) return 1;
+
+                            // If both or neither are bottom types, maintain order
+                            return 0;
+                        });
+
+                        // Get legend items for all types in this cell (using sorted order)
+                        const legendItems = sortedTypes.map(type => legendTypes.find((t) => t.key === type)).filter(Boolean)
+
+                        // Create title showing all types
+                        const title = isEmpty ? 'Empty' : sortedTypes.map(t => t.replace(/_/g, ' ')).join(' + ')
+
                         return (
                             <button
                                 key={idx}
                                 onClick={() => handleCellClick(idx)}
-                                className={`h-12 border border-gray-300 rounded-md flex items-center justify-center text-gray-700 text-xs select-none relative overflow-hidden ${!image && swatchClass ? swatchClass : 'bg-white'}`}
+                                className="h-16 border-2 border-gray-300 rounded-md text-gray-700 text-xs select-none relative overflow-visible bg-white"
                                 type="button"
-                                title={type || 'Empty'}
+                                title={title}
                                 disabled={loading}
+                                style={{ minHeight: '64px' }}
                             >
-                                {image ? (
-                                    <img src={image} alt={type} className="w-full h-full object-cover" />
+                                {isEmpty ? (
+                                    <span className="text-gray-400 text-xs">—</span>
                                 ) : (
-                                    type ? type.replace(/_/g, ' ') : ''
+                                    // Layer upon layer - stack with offsets
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        {legendItems.map((item, i) => {
+                                            // Calculate offset for stacking effect (each layer shifts slightly)
+                                            const offsetX = i * 3;
+                                            const offsetY = i * 3;
+                                            const zIndex = i;
+                                            const scale = 1 - (i * 0.05); // Slightly smaller for depth
+
+                                            return (
+                                                <div
+                                                    key={i}
+                                                    className="absolute rounded-md overflow-hidden"
+                                                    style={{
+                                                        width: '100%',
+                                                        height: '100%',
+                                                        left: `${offsetX}px`,
+                                                        top: `${offsetY}px`,
+                                                        zIndex: zIndex,
+                                                        transform: `scale(${scale})`,
+                                                        transformOrigin: 'top left',
+                                                    }}
+                                                >
+                                                    {item.image ? (
+                                                        <img
+                                                            src={item.image}
+                                                            alt={item.label}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className={`w-full h-full ${item.swatchClass}`}></div>
+                                                    )}
+                                                </div>
+                                            )
+                                        })}
+                                        {/* Badge showing count if more than 1 */}
+                                        {legendItems.length > 1 && (
+                                            <div
+                                                className="absolute bottom-1 right-1 bg-blue-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-lg"
+                                                style={{ zIndex: 100 }}
+                                            >
+                                                {legendItems.length}
+                                            </div>
+                                        )}
+                                    </div>
                                 )}
                             </button>
                         )

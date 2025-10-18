@@ -13,10 +13,12 @@ import Dashboard from './pages/Dashboard'
 import NotFound from './pages/NotFound'
 import RoadView from './pages/RoadView'
 import Roads from './pages/Roads'
+import Users from './pages/Users'
 
 // Components
 import ProtectedLayout from './components/ProtectedLayout'
 import RoleBasedRoute from './components/RoleBasedRoute'
+import PermissionBasedRoute from './components/PermissionBasedRoute'
 import { useAuth } from './context/AuthContext'
 
 function App() {
@@ -66,7 +68,9 @@ function App() {
         path="/form"
         element={
           <ProtectedLayout>
-            <VCIForm />
+            <PermissionBasedRoute requireReportIssue={true}>
+              <VCIForm />
+            </PermissionBasedRoute>
           </ProtectedLayout>
         }
       />
@@ -87,6 +91,17 @@ function App() {
           <ProtectedLayout>
             <RoleBasedRoute allowedRoles={['admin']}>
               <RoadView />
+            </RoleBasedRoute>
+          </ProtectedLayout>
+        }
+      />
+      {/* Admin only route - Users */}
+      <Route
+        path="/users"
+        element={
+          <ProtectedLayout>
+            <RoleBasedRoute allowedRoles={['admin']}>
+              <Users />
             </RoleBasedRoute>
           </ProtectedLayout>
         }

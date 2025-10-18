@@ -4,7 +4,7 @@ import { useToast } from '../context/ToastContext'
 import React from 'react'
 
 const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
-  const { user, signOut, isAdmin } = useAuth()
+  const { user, signOut, isAdmin, canReportIssue } = useAuth()
   const { success, error: showError } = useToast()
   const navigate = useNavigate()
 
@@ -118,22 +118,42 @@ const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
                     {isSidebarOpen && <span>Roads</span>}
                   </NavLink>
                 )}
-                {/* Available to all users */}
-                <NavLink
-                  to="/form"
-                  className={({ isActive }) =>
-                    `flex items-center ${isSidebarOpen ? 'px-4' : 'px-0 justify-center'} py-3 text-sm font-medium rounded-lg transition ${isActive
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'
-                    }`
-                  }
-                  title={!isSidebarOpen ? "Report Issue" : ""}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${isSidebarOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  {isSidebarOpen && <span>Report Issue</span>}
-                </NavLink>
+                {/* Admin only link - Users */}
+                {isAdmin && (
+                  <NavLink
+                    to="/users"
+                    className={({ isActive }) =>
+                      `flex items-center ${isSidebarOpen ? 'px-4' : 'px-0 justify-center'} py-3 text-sm font-medium rounded-lg transition ${isActive
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'
+                      }`
+                    }
+                    title={!isSidebarOpen ? "Users" : ""}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${isSidebarOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    {isSidebarOpen && <span>Users</span>}
+                  </NavLink>
+                )}
+                {/* Available to users with permission or admins */}
+                {canReportIssue && (
+                  <NavLink
+                    to="/form"
+                    className={({ isActive }) =>
+                      `flex items-center ${isSidebarOpen ? 'px-4' : 'px-0 justify-center'} py-3 text-sm font-medium rounded-lg transition ${isActive
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'
+                      }`
+                    }
+                    title={!isSidebarOpen ? "Report Issue" : ""}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${isSidebarOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    {isSidebarOpen && <span>Report Condition</span>}
+                  </NavLink>
+                )}
               </div>
             </div>
           )}

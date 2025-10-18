@@ -18,6 +18,9 @@ export const AuthProvider = ({ children }) => {
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
   const [userRole, setUserRole] = useState(null)
+  const [permissions, setPermissions] = useState({
+    canReportIssue: false
+  })
 
   useEffect(() => {
     // Get initial session
@@ -25,6 +28,9 @@ export const AuthProvider = ({ children }) => {
       setSession(session)
       setUser(session?.user ?? null)
       setUserRole(session?.user?.user_metadata?.role || 'user')
+      setPermissions({
+        canReportIssue: session?.user?.user_metadata?.can_report_issue || false
+      })
       setLoading(false)
     })
 
@@ -35,6 +41,9 @@ export const AuthProvider = ({ children }) => {
       setSession(session)
       setUser(session?.user ?? null)
       setUserRole(session?.user?.user_metadata?.role || 'user')
+      setPermissions({
+        canReportIssue: session?.user?.user_metadata?.can_report_issue || false
+      })
       setLoading(false)
     })
 
@@ -46,8 +55,10 @@ export const AuthProvider = ({ children }) => {
     session,
     loading,
     userRole,
+    permissions,
     isAdmin: userRole === 'admin',
     isUser: userRole === 'user',
+    canReportIssue: userRole === 'admin' || permissions.canReportIssue,
     signUp: async (email, password, metadata = {}) => {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -85,6 +96,7 @@ export const AuthProvider = ({ children }) => {
         setSession(null)
         setUser(null)
         setUserRole(null)
+        setPermissions({ canReportIssue: false })
 
         // Clear any stored session data
         localStorage.removeItem('supabase.auth.token')
@@ -97,6 +109,7 @@ export const AuthProvider = ({ children }) => {
         setSession(null)
         setUser(null)
         setUserRole(null)
+        setPermissions({ canReportIssue: false })
         localStorage.removeItem('supabase.auth.token')
 
         // Don't return error if it's just a session missing error
