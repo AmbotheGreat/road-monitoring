@@ -167,7 +167,7 @@ const VCIForm = () => {
         <h2 className="text-2xl font-bold text-gray-800 mb-6">VCI Distress Evaluation Form</h2>
 
         <div className="flex w-full">
-          <div className="mb-6 w-1/2">
+          <div className="mb-4 w-1/2">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Surface Type
             </label>
@@ -195,6 +195,16 @@ const VCIForm = () => {
             </div>
           </div>
 
+          <div className="mb-7 flex items-end justify-center px-4">
+            <button
+              type="button"
+              onClick={() => window.open('/guidelines.pdf', '_blank')}
+              className="px-6 py-2 text-sm font-medium bg-green-600 text-white border border-green-600 rounded-lg hover:bg-green-700 transition-colors shadow-sm"
+            >
+              Guidelines
+            </button>
+          </div>
+
           <div className="mb-6 w-1/2">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Select Road for Evaluation
@@ -211,7 +221,7 @@ const VCIForm = () => {
               className="max-w-md"
             />
             {selectedRoad && (
-              <div className="mt-2 p-3 bg-blue-50 rounded-md">
+              <div className="mt-2 p-2 bg-blue-50 rounded-md">
                 <p className="text-sm text-blue-800">
                   <span className="font-medium">Selected Road:</span> {selectedRoad.road_name}
                   {selectedRoad.location && (
