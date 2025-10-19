@@ -91,7 +91,7 @@ const Dashboard = () => {
                 icon="📍"
               />
               <DashboardCard
-                title="Report Issue"
+                title="Report Condition"
                 description="Submit a new road condition report"
                 link="/form"
                 icon="📝"
