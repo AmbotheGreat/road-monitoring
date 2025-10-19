@@ -36,10 +36,10 @@ const RoadsTable = ({
         }
         const vci = road && (typeof road.vci === 'number' ? road.vci : Number(road?.vci));
         if (!isNaN(vci)) {
-            if (vci >= 80) return 'good';
-            if (vci >= 60) return 'fair';
-            if (vci >= 40) return 'poor';
-            return 'bad';
+            if (vci > 70 && vci <= 100) return 'good';
+            if (vci > 40 && vci <= 70) return 'fair';
+            if (vci > 20 && vci <= 40) return 'poor';
+            if (vci >= 1 && vci <= 20) return 'bad';
         }
         return undefined;
     };
@@ -48,10 +48,10 @@ const RoadsTable = ({
         const numValue = typeof value === 'number' ? value : Number(value);
         if (isNaN(numValue)) return '';
 
-        if (numValue >= 70.1) return 'bg-green-500 text-white font-semibold';
-        if (numValue >= 40.1) return 'bg-yellow-400 text-gray-900 font-semibold';
-        if (numValue >= 20.1) return 'bg-orange-500 text-white font-semibold';
-        if (numValue >= 1) return 'bg-red-500 text-white font-semibold';
+        if (numValue > 70 && numValue <= 100) return 'bg-green-500 text-white font-semibold';
+        if (numValue > 40 && numValue <= 70) return 'bg-yellow-400 text-gray-900 font-semibold';
+        if (numValue > 20 && numValue <= 40) return 'bg-orange-500 text-white font-semibold';
+        if (numValue >= 1 && numValue <= 20) return 'bg-red-500 text-white font-semibold';
         return '';
     };
 
