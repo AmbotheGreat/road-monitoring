@@ -77,8 +77,8 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-full mx-auto py-6 px-6">
-        <div className="py-6">
+      <div className="max-w-full mx-auto px-2">
+        <div className="py-2">
           <div className="bg-white shadow rounded-lg p-6">
             <h1 className="text-3xl font-bold text-gray-900 mb-4">
               Welcome to your Dashboard
