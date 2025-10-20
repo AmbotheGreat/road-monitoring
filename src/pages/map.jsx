@@ -263,24 +263,24 @@ const Map = () => {
     return (
         <>
             {/* Live Map View */}
-            <div className="bg-white rounded-lg shadow-lg p-6 m-2">
-                {/* Search and Legend - Side by Side */}
-                <div className="flex gap-4 mb-4">
+            <div className="bg-white rounded-lg shadow-lg p-2 sm:p-4 md:p-6 m-1 sm:m-2">
+                {/* Search and Legend - Responsive Layout */}
+                <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 mb-3 sm:mb-4">
                     {/* Search Section */}
-                    <div className="flex-1">
-                        <div className="bg-white rounded-lg border border-gray-200 p-3">
-                            <div className="flex items-end gap-2">
-                                <div className="flex-1">
+                    <div className="w-full lg:flex-1">
+                        <div className="bg-white rounded-lg border border-gray-200 p-2 sm:p-3">
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-2">
+                                <div className="flex-1 w-full">
                                     <SearchableDropdown
                                         options={roadsData || []}
                                         value={selectedRoadId}
                                         onChange={handleRoadSelection}
-                                        placeholder="Select a map ... 🔍"
+                                        placeholder="Select a road... 🔍"
                                         displayKey="road_name"
                                         valueKey="id"
                                         loading={roadsLoading}
                                         error={roadsError}
-                                        className="max-w-md"
+                                        className="w-full"
                                     />
                                 </div>
                                 {selectedRoadId && (
@@ -293,7 +293,7 @@ const Map = () => {
                                                 displayRoadsOnMap(mapInstanceRef.current);
                                             }
                                         }}
-                                        className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium rounded-md transition-colors"
+                                        className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white text-xs sm:text-sm font-medium rounded-md transition-colors"
                                     >
                                         View All Roads
                                     </button>
@@ -303,45 +303,45 @@ const Map = () => {
                     </div>
 
                     {/* Legend Section */}
-                    <div className="flex-1">
-                        <div className="bg-white rounded-lg border border-gray-200 p-3">
-                            <h3 className="text-sm font-semibold text-gray-700 mb-2">Legend</h3>
-                            <div className="flex flex-wrap gap-4 text-xs">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-8 h-1 bg-blue-500"></div>
-                                    <span className="text-gray-600">No VCI Data</span>
+                    <div className="w-full lg:flex-1">
+                        <div className="bg-white rounded-lg border border-gray-200 p-2 sm:p-3">
+                            <h3 className="text-xs sm:text-sm font-semibold text-gray-700 mb-2">Road Condition Legend</h3>
+                            <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-4 text-xs">
+                                <div className="flex items-center gap-1 sm:gap-2">
+                                    <div className="w-6 sm:w-8 h-1 bg-blue-500"></div>
+                                    <span className="text-gray-600 text-xs">No Data</span>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <div className="w-4 h-4 rounded-full bg-green-500 border-2 border-white"></div>
-                                    <span className="text-gray-600">Good</span>
+                                <div className="flex items-center gap-1 sm:gap-2">
+                                    <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-green-500 border-2 border-white"></div>
+                                    <span className="text-gray-600 text-xs">Good</span>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <div className="w-4 h-4 rounded-full bg-yellow-400 border-2 border-white"></div>
-                                    <span className="text-gray-600">Fair</span>
+                                <div className="flex items-center gap-1 sm:gap-2">
+                                    <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-yellow-400 border-2 border-white"></div>
+                                    <span className="text-gray-600 text-xs">Fair</span>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <div className="w-4 h-4 rounded-full bg-orange-500 border-2 border-white"></div>
-                                    <span className="text-gray-600">Poor</span>
+                                <div className="flex items-center gap-1 sm:gap-2">
+                                    <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-orange-500 border-2 border-white"></div>
+                                    <span className="text-gray-600 text-xs">Poor</span>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <div className="w-4 h-4 rounded-full bg-red-600 border-2 border-white"></div>
-                                    <span className="text-gray-600">Bad</span>
+                                <div className="flex items-center gap-1 sm:gap-2">
+                                    <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-red-600 border-2 border-white"></div>
+                                    <span className="text-gray-600 text-xs">Bad</span>
                                 </div>
                             </div>
-                            <p className="text-xs text-gray-500 mt-2">
+                            <p className="text-xs text-gray-500 mt-2 hidden sm:block">
                                 Click on road segments to view details
                             </p>
                         </div>
                     </div>
                 </div>
 
-                {/* Map */}
-                <div className="relative">
+                {/* Map - Responsive Height */}
+                <div className="relative rounded-lg overflow-hidden">
                     <GoogleMap
                         apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
                         center={MAP_CONFIG.DEFAULT_CENTER}
                         zoom={MAP_CONFIG.DEFAULT_ZOOM}
-                        height={MAP_CONFIG.DEFAULT_HEIGHT}
+                        height="450px"
                         onMapLoad={handleMapLoad}
                     />
                 </div>

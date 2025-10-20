@@ -162,20 +162,24 @@ const VCIForm = () => {
   const VCI = Math.max(0, 100 * (1 - Math.sqrt(1 - Math.pow((100 - (Math.min(300, totalSDWF) / 3)) / 100, 2))));
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="bg-white shadow-lg rounded-lg p-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">VCI Distress Evaluation Form</h2>
+    <div className="w-full mx-auto px-2 sm:px-4 py-4 sm:py-6 lg:py-8 max-w-7xl">
+      <div className="bg-white shadow-lg rounded-lg p-3 sm:p-4 md:p-6">
+        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">
+          VCI Distress Evaluation Form
+        </h2>
 
-        <div className="flex w-full">
-          <div className="mb-4 w-1/2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+        {/* Responsive Grid Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+          {/* Surface Type */}
+          <div className="w-full">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
               Surface Type
             </label>
-            <div className="inline-flex rounded-md shadow-sm" role="group">
+            <div className="inline-flex w-full sm:w-auto rounded-md shadow-sm" role="group">
               <button
                 type="button"
                 onClick={() => handleSurfaceTypeChange('concrete')}
-                className={`px-6 py-2 text-sm font-medium border rounded-l-lg transition-colors ${surfaceType === 'concrete'
+                className={`flex-1 sm:flex-none px-4 sm:px-6 py-2 text-xs sm:text-sm font-medium border rounded-l-lg transition-colors ${surfaceType === 'concrete'
                   ? 'bg-blue-600 text-white border-blue-600'
                   : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                   }`}
@@ -185,7 +189,7 @@ const VCIForm = () => {
               <button
                 type="button"
                 onClick={() => handleSurfaceTypeChange('asphalt')}
-                className={`px-6 py-2 text-sm font-medium border rounded-r-lg transition-colors ${surfaceType === 'asphalt'
+                className={`flex-1 sm:flex-none px-4 sm:px-6 py-2 text-xs sm:text-sm font-medium border rounded-r-lg transition-colors ${surfaceType === 'asphalt'
                   ? 'bg-blue-600 text-white border-blue-600'
                   : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                   }`}
@@ -195,18 +199,20 @@ const VCIForm = () => {
             </div>
           </div>
 
-          <div className="mb-7 flex items-end justify-center px-4">
+          {/* Guidelines Button */}
+          <div className="w-full flex items-end">
             <button
               type="button"
               onClick={() => window.open('/guidelines.pdf', '_blank')}
-              className="px-6 py-2 text-sm font-medium bg-green-600 text-white border border-green-600 rounded-lg hover:bg-green-700 transition-colors shadow-sm"
+              className="w-full sm:w-auto px-4 sm:px-6 py-2 text-xs sm:text-sm font-medium bg-green-600 text-white border border-green-600 rounded-lg hover:bg-green-700 transition-colors shadow-sm"
             >
-              Guidelines
+              📄 View Guidelines
             </button>
           </div>
 
-          <div className="mb-6 w-1/2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          {/* Road Selection - takes full width on small screens, partial on larger */}
+          <div className="w-full md:col-span-2 lg:col-span-1">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
               Select Road for Evaluation
             </label>
             <SearchableDropdown
@@ -218,11 +224,11 @@ const VCIForm = () => {
               valueKey="id"
               loading={roadsLoading}
               error={roadsError}
-              className="max-w-md"
+              className="w-full"
             />
             {selectedRoad && (
               <div className="mt-2 p-2 bg-blue-50 rounded-md">
-                <p className="text-sm text-blue-800">
+                <p className="text-xs sm:text-sm text-blue-800">
                   <span className="font-medium">Selected Road:</span> {selectedRoad.road_name}
                   {selectedRoad.location && (
                     <span className="ml-2 text-blue-600">({selectedRoad.location})</span>
@@ -233,64 +239,91 @@ const VCIForm = () => {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm text-left text-gray-700">
-            <thead className="bg-gray-100 text-xs uppercase">
-              <tr>
-                <th className="py-3 px-4">Distress Type</th>
-                <th className="py-3 px-4">Observed Value</th>
-                <th className="py-3 px-4">Weight Factor</th>
-                <th className="py-3 px-4">Weighted Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.map((row, index) => (
-                <tr key={index} className="border-b hover:bg-gray-50">
-                  <td className="py-3 px-4">{row.type}</td>
-                  <td className="py-3 px-4">
-                    <input
-                      type="number"
-                      value={row.observed}
-                      onChange={(e) => handleInputChange(index, e.target.value)}
-                      className="w-24 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="0"
-                    />
-                  </td>
-                  <td className="py-3 px-4">{row.weight}</td>
-                  <td className="py-3 px-4">{row.weighted.toFixed(2)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        {/* Responsive Table with Horizontal Scroll */}
+        <div className="overflow-x-auto -mx-3 sm:-mx-4 md:-mx-6 px-3 sm:px-4 md:px-6">
+          <div className="inline-block min-w-full align-middle">
+            <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+              <table className="min-w-full divide-y divide-gray-300">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                      Distress Type
+                    </th>
+                    <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                      Observed
+                    </th>
+                    <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                      Weight
+                    </th>
+                    <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                      Weighted
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {data.map((row, index) => (
+                    <tr key={index} className="hover:bg-gray-50 transition-colors">
+                      <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-gray-900 whitespace-normal sm:whitespace-nowrap">
+                        {row.type}
+                      </td>
+                      <td className="py-2 sm:py-3 px-2 sm:px-4">
+                        <input
+                          type="number"
+                          value={row.observed}
+                          onChange={(e) => handleInputChange(index, e.target.value)}
+                          className="w-16 sm:w-24 px-2 py-1 text-xs sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="0"
+                        />
+                      </td>
+                      <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-gray-700">
+                        {row.weight}
+                      </td>
+                      <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-gray-700 font-medium">
+                        {row.weighted.toFixed(2)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
-        <div className="mt-6 border-t pt-4">
-          <div className="flex justify-between text-lg font-semibold">
-            <span>Total SDWF:</span>
-            <span>{totalSDWF.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between text-lg font-semibold text-blue-700 mt-2">
-            <span>VCI:</span>
-            <span>{VCI.toFixed(8)}</span>
+        {/* Summary and Submit Section */}
+        <div className="mt-4 sm:mt-6 border-t pt-4">
+          {/* Results Display */}
+          <div className="space-y-2 sm:space-y-3 bg-gray-50 p-3 sm:p-4 rounded-lg">
+            <div className="flex justify-between items-center text-sm sm:text-base md:text-lg font-semibold">
+              <span className="text-gray-700">Total SDWF:</span>
+              <span className="text-gray-900">{totalSDWF.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between items-center text-base sm:text-lg md:text-xl font-bold text-blue-700">
+              <span>VCI Value:</span>
+              <span>{VCI.toFixed(8)}</span>
+            </div>
           </div>
 
           {/* Submit Button */}
-          <div className="mt-6 flex flex-col items-center space-y-4">
+          <div className="mt-4 sm:mt-6 flex flex-col items-center space-y-3 sm:space-y-4">
             <Button
               onClick={handleSaveVCI}
               disabled={!selectedRoadId || VCI === 0 || isSaving}
               variant="primary"
-              className="px-8 py-3 text-lg font-semibold"
+              className="w-full sm:w-auto px-6 sm:px-8 py-2 sm:py-3 text-sm sm:text-base md:text-lg font-semibold"
             >
-              {isSaving ? 'Submitting VCI...' : 'Submit'}
+              {isSaving ? 'Submitting VCI...' : 'Submit VCI Report'}
             </Button>
 
             {/* Helper Text */}
             {!selectedRoadId && (
-              <p className="text-gray-500 text-sm">Please select a road to save VCI data</p>
+              <p className="text-gray-500 text-xs sm:text-sm text-center">
+                Please select a road to save VCI data
+              </p>
             )}
             {selectedRoadId && VCI === 0 && (
-              <p className="text-gray-500 text-sm">Enter distress values to calculate VCI</p>
+              <p className="text-gray-500 text-xs sm:text-sm text-center">
+                Enter distress values to calculate VCI
+              </p>
             )}
           </div>
         </div>

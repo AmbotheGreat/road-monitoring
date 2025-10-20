@@ -1,11 +1,23 @@
 @import "tailwindcss";
 
+/* Base responsive styles */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 /* Custom animations for toast notifications */
 @keyframes slide-in {
   from {
     transform: translateX(100%);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -14,6 +26,25 @@
 
 .animate-slide-in {
   animation: slide-in 0.3s ease-out;
+}
+
+/* Responsive text utilities */
+@media (max-width: 640px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+/* Better touch targets for mobile */
+@media (max-width: 768px) {
+
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    min-height: 44px;
+  }
 }
 
 /* Remove border/outline from Google Maps InfoWindow close (X) button */
@@ -32,4 +63,39 @@
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
+}
+
+/* Responsive Google Maps adjustments */
+.gm-style-iw {
+  max-width: 300px !important;
+}
+
+@media (max-width: 640px) {
+  .gm-style-iw {
+    max-width: 250px !important;
+  }
+}
+
+/* Smooth scrolling for better mobile experience */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Improved focus states for accessibility */
+:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
 }

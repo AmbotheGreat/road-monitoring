@@ -21,36 +21,36 @@ const SearchableDropdown = ({
   // Filter and sort options based on search term
   useEffect(() => {
     const safeOptions = options || [];
-    
+
     // Sort options by ID in ascending order (1 first)
     const sortedOptions = [...safeOptions].sort((a, b) => {
       const idA = parseInt(a[valueKey]) || 0;
       const idB = parseInt(b[valueKey]) || 0;
       return idA - idB;
     });
-    
+
     if (!searchTerm) {
       setFilteredOptions(sortedOptions);
     } else {
       const filtered = sortedOptions.filter(option => {
         const displayValue = option[displayKey];
         const searchLower = searchTerm.toLowerCase();
-        
+
         // Search in the main display field if it exists
         if (displayValue && typeof displayValue === 'string') {
           if (displayValue.toLowerCase().includes(searchLower)) {
             return true;
           }
         }
-        
+
         // Also search in other fields like location, id, or any string field
-        const searchableFields = Object.entries(option).filter(([key, val]) => 
+        const searchableFields = Object.entries(option).filter(([key, val]) =>
           typeof val === 'string' && val.toLowerCase().includes(searchLower)
         );
-        
+
         // Include if found in any searchable field or if searching by ID
-        return searchableFields.length > 0 || 
-               String(option[valueKey]).toLowerCase().includes(searchLower);
+        return searchableFields.length > 0 ||
+          String(option[valueKey]).toLowerCase().includes(searchLower);
       });
       setFilteredOptions(filtered);
     }
@@ -122,23 +122,22 @@ const SearchableDropdown = ({
           placeholder={placeholder}
           disabled={disabled || loading}
           className={`
-            w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm
+            w-full px-2 sm:px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-md shadow-sm
             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
             ${disabled || loading ? 'bg-gray-100 cursor-not-allowed' : 'bg-white cursor-pointer'}
             ${error ? 'border-red-500' : ''}
           `}
           readOnly={!isOpen}
         />
-        
+
         {/* Dropdown arrow */}
         <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
           {loading ? (
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
           ) : (
             <svg
-              className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${
-                isOpen ? 'transform rotate-180' : ''
-              }`}
+              className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${isOpen ? 'transform rotate-180' : ''
+                }`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -156,9 +155,9 @@ const SearchableDropdown = ({
 
       {/* Dropdown menu */}
       {isOpen && !disabled && !loading && (
-        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 sm:max-h-60 overflow-auto">
           {filteredOptions.length === 0 ? (
-            <div className="px-3 py-2 text-sm text-gray-500">
+            <div className="px-2 sm:px-3 py-2 text-xs sm:text-sm text-gray-500">
               {searchTerm ? 'No roads found matching your search' : 'No roads available'}
             </div>
           ) : (
@@ -167,7 +166,7 @@ const SearchableDropdown = ({
                 key={option[valueKey]}
                 onClick={() => handleOptionSelect(option)}
                 className={`
-                  px-3 py-2 cursor-pointer text-sm hover:bg-blue-50
+                  px-2 sm:px-3 py-2.5 sm:py-2 cursor-pointer text-xs sm:text-sm hover:bg-blue-50 transition-colors
                   ${option[valueKey] === value ? 'bg-blue-100 text-blue-900' : 'text-gray-900'}
                 `}
               >
