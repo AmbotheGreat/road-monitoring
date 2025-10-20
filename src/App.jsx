@@ -110,9 +110,7 @@ function App() {
       <Route
         path="/"
         element={
-          <ProtectedLayout>
-            <Map />
-          </ProtectedLayout>
+          <LoginPage />
         }
       />
 

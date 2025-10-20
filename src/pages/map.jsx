@@ -283,21 +283,42 @@ const Map = () => {
                                         className="w-full"
                                     />
                                 </div>
-                                {selectedRoadId && (
+                                <div className="flex gap-2 w-full sm:w-auto">
+                                    {selectedRoadId && (
+                                        <button
+                                            onClick={() => {
+                                                setSelectedRoadId('');
+                                                setSelectedRoad(null);
+                                                isZoomingToRoadRef.current = false;
+                                                if (mapInstanceRef.current && roadsData && roadsData.length > 0) {
+                                                    displayRoadsOnMap(mapInstanceRef.current);
+                                                }
+                                            }}
+                                            className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white text-xs sm:text-sm font-medium rounded-md transition-colors"
+                                        >
+                                            View All Roads
+                                        </button>
+                                    )}
                                     <button
                                         onClick={() => {
-                                            setSelectedRoadId('');
-                                            setSelectedRoad(null);
-                                            isZoomingToRoadRef.current = false;
-                                            if (mapInstanceRef.current && roadsData && roadsData.length > 0) {
-                                                displayRoadsOnMap(mapInstanceRef.current);
+                                            fetchRoads();
+                                            if (mapInstanceRef.current) {
+                                                // Clear current selection
+                                                setSelectedRoadId('');
+                                                setSelectedRoad(null);
+                                                isZoomingToRoadRef.current = false;
                                             }
                                         }}
-                                        className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white text-xs sm:text-sm font-medium rounded-md transition-colors"
+                                        disabled={roadsLoading}
+                                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white text-xs sm:text-sm font-medium rounded-md transition-colors flex items-center justify-center gap-2"
+                                        title="Refresh map data"
                                     >
-                                        View All Roads
+                                        <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ${roadsLoading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                        <span className="hidden sm:inline">Refresh</span>
                                     </button>
-                                )}
+                                </div>
                             </div>
                         </div>
                     </div>
